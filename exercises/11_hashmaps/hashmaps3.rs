@@ -31,6 +31,41 @@ fn build_scores_table(results: &str) -> HashMap<&str, TeamScores> {
         // Keep in mind that goals scored by team 1 will be the number of goals
         // conceded by team 2. Similarly, goals scored by team 2 will be the
         // number of goals conceded by team 1.
+        if let Some(existing_team_1_score) = scores.get(&team_1_name) {
+            scores.insert(
+                team_1_name,
+                TeamScores {
+                    goals_scored: team_1_score + existing_team_1_score.goals_scored,
+                    goals_conceded: team_2_score + existing_team_1_score.goals_conceded,
+                },
+            );
+        } else {
+            scores.insert(
+                team_1_name,
+                TeamScores {
+                    goals_scored: team_1_score,
+                    goals_conceded: team_2_score,
+                },
+            );
+        }
+
+        if let Some(existing_team_2_score) = scores.get(&team_2_name) {
+            scores.insert(
+                team_2_name,
+                TeamScores {
+                    goals_scored: team_2_score + existing_team_2_score.goals_scored,
+                    goals_conceded: team_1_score + existing_team_2_score.goals_conceded,
+                },
+            );
+        } else {
+            scores.insert(
+                team_2_name,
+                TeamScores {
+                    goals_scored: team_2_score,
+                    goals_conceded: team_1_score,
+                },
+            );
+        }
     }
 
     scores
@@ -54,9 +89,11 @@ England,Spain,1,0";
     fn build_scores() {
         let scores = build_scores_table(RESULTS);
 
-        assert!(["England", "France", "Germany", "Italy", "Poland", "Spain"]
-            .into_iter()
-            .all(|team_name| scores.contains_key(team_name)));
+        assert!(
+            ["England", "France", "Germany", "Italy", "Poland", "Spain"]
+                .into_iter()
+                .all(|team_name| scores.contains_key(team_name))
+        );
     }
 
     #[test]
